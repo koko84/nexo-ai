@@ -1,0 +1,21 @@
+{
+  "name": "nexo-ai",
+  "version": "1.2.1",
+  "private": true,
+  "description": "NEXO AI multilingual assistant platform",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "check": "node --check server/index.js && node --check server/validation.js && node --check public/app.js && node --check public/i18n.js && node --check test/smoke.test.js && node --check test/api.test.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "express-rate-limit": "^7.5.0"
+  }
+}
