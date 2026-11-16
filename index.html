@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="NEXO AI — a multilingual workspace for asking, learning, writing and building.">
+<meta name="theme-color" content="#0b1020">
+<title>NEXO AI — Multilingual AI Workspace</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="NEXO AI home"><span class="mark">N</span><span>NEXO <em>AI</em></span></a>
+    <button class="new-chat" id="newChat" data-i18n="newChat">＋ New conversation</button>
+    <p class="section-label" data-i18n="workspace">WORKSPACE</p>
+    <nav aria-label="Workspace">
+      <button class="nav active" data-mode="chat">✦ <span data-i18n="nav_chat">AI Chat</span></button>
+      <button class="nav" data-mode="learn">▤ <span data-i18n="nav_learn">Learning assistant</span></button>
+      <button class="nav" data-mode="write">✎ <span data-i18n="nav_write">Writing studio</span></button>
+      <button class="nav" data-mode="code">⌘ <span data-i18n="nav_code">Coding assistant</span></button>
+      <button class="nav" data-mode="translate">文 <span data-i18n="nav_translate">Translator</span></button>
+      <button class="nav" data-mode="files">▧ <span data-i18n="nav_files">Document tools</span></button>
+    </nav>
+    <div class="side-links">
+      <a href="/about.html">About</a><a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a><a href="/contact.html">Contact</a>
+      <small data-i18n="sideNote">AI can make mistakes. Verify important information.</small>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><i></i><span id="modeTitle">AI Chat</span></div>
+      <div class="top-right">
+        <label class="sr-only" for="language">Language</label>
+        <select id="language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option></select>
+        <span class="guest" aria-label="Guest account">G</span>
+      </div>
+    </header>
+    <section class="workspace">
+      <div class="welcome" id="welcome">
+        <div class="orb">✦</div><p class="eyebrow" data-i18n="eyebrow">YOUR AI WORKSPACE</p>
+        <h1><span data-i18n="h1a">What can we</span> <span class="grad" data-i18n="h1b">create</span> <span data-i18n="h1c">today?</span></h1>
+        <p class="subtitle" data-i18n="subtitle">Ask questions, explore ideas, learn something new, or plan your next project.</p>
+        <div class="cards">
+          <button class="prompt-card" data-i18n-prompt="c1p" data-prompt="Explain a difficult topic in simple steps."><b>▤ <span data-i18n="c1t">Learn something</span></b><small data-i18n="c1s">Clear explanations, step by step</small></button>
+          <button class="prompt-card" data-i18n-prompt="c2p" data-prompt="Help me brainstorm an original project idea."><b>✧ <span data-i18n="c2t">Explore ideas</span></b><small data-i18n="c2s">Brainstorm and plan your next idea</small></button>
+          <button class="prompt-card" data-i18n-prompt="c3p" data-prompt="Help me write a clear and professional message."><b>✎ <span data-i18n="c3t">Write better</span></b><small data-i18n="c3s">Draft, improve and summarize text</small></button>
+          <button class="prompt-card" data-i18n-prompt="c4p" data-prompt="Help me understand and debug this code."><b>⌘ <span data-i18n="c4t">Build with code</span></b><small data-i18n="c4s">Understand code and solve errors</small></button>
+        </div>
+      </div>
+      <div class="conversation" id="conversation" aria-live="polite"></div>
+      <div class="composer-area">
+        <p class="status" id="status" role="alert" hidden></p>
+        <form class="composer" id="chatForm">
+          <textarea id="prompt" dir="auto" rows="1" maxlength="6000" placeholder="Message NEXO AI…" aria-label="Message NEXO AI"></textarea>
+          <div class="composer-bottom"><span data-i18n="hint">Never share passwords or sensitive personal information.</span><button id="sendBtn" type="submit" aria-label="Send message">↑</button></div>
+        </form>
+        <p class="disclaimer" data-i18n="disclaimer">NEXO AI responses may be inaccurate. Check important information independently.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="/i18n.js" defer></script>
+<script src="/app.js" defer></script>
+</body>
+</html>
