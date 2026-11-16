@@ -140,4 +140,5 @@ if (require.main === module) {
   app.listen(PORT, () => console.log(`NEXO AI listening on port ${PORT}`));
 }
 
-module.exports = { app };
+module.exports = app;
+module.exports.app = app;
