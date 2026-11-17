@@ -112,10 +112,13 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
 });
 
 app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
-app.get("*", (req, res) => {
+
+// FIX: Use app.use instead of app.get("*") - works on Express 4 and Express 5
+app.use((req, res) => {
   if (path.extname(req.path)) return res.status(404).type("text/plain").send("Not found");
   return res.sendFile(path.join(PUBLIC_DIR, "index.html"));
 });
+
 app.use((error, _req, res, _next) => {
   if (error && error.type === "entity.too.large") return res.status(413).json({ error: "Request is too large." });
   if (error && (error.type === "entity.parse.failed" || error instanceof SyntaxError)) {
@@ -129,4 +132,5 @@ if (require.main === module) {
   app.listen(PORT, () => console.log(`NEXO AI listening on port ${PORT}`));
 }
 
-module.exports = { app };
+// FIX: Vercel needs app directly, not { app }
+module.exports = app;
