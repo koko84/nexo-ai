@@ -11,19 +11,9 @@ const { MODES, cleanMessages, isValidLang, buildSystemPrompt } = require("./vali
 
 app.disable("x-powered-by");
 
-// Set TRUST_PROXY=1 (number of proxy hops) only when running behind a trusted reverse proxy.
-const trustProxyHops = Number(process.env.TRUST_PROXY || 0);
+// FIX: Vercel is always behind a proxy, so trust it by default
+const trustProxyHops = Number(process.env.TRUST_PROXY || 1);
 if (Number.isInteger(trustProxyHops) && trustProxyHops > 0) app.set("trust proxy", trustProxyHops);
-
-// Without TRUST_PROXY, every user behind a proxy shares one IP and one rate-limit bucket. Warn once.
-let warnedAboutProxy = false;
-app.use((req, _res, next) => {
-  if (!warnedAboutProxy && !(trustProxyHops > 0) && req.headers["x-forwarded-for"]) {
-    warnedAboutProxy = true;
-    console.warn("X-Forwarded-For received but TRUST_PROXY is not set. If this app runs behind a reverse proxy, set TRUST_PROXY=1 or all users will share one rate limit.");
-  }
-  next();
-});
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -39,8 +29,6 @@ app.use(helmet({
   }
 }));
 
-// Keep API parsing separate so malformed JSON can receive a proper 400 response.
-// 256kb comfortably fits 60,000 characters of history even at 3 bytes per character plus JSON overhead.
 app.use("/api", (_req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
 app.use("/api", express.json({ limit: "256kb", strict: true }));
 app.use(express.static(PUBLIC_DIR, { extensions: ["html"], index: "index.html" }));
@@ -64,7 +52,7 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
   const mode = body.mode;
   const lang = body.lang === undefined ? "en" : body.lang;
   if (!messages) {
-    return res.status(400).json({ error: "Invalid message history. Send 1–20 valid messages, ending with a user message." });
+    return res.status(400).json({ error: "Invalid message history. Send 1-20 valid messages, ending with a user message." });
   }
   if (typeof mode !== "string" || !Object.hasOwn(MODES, mode)) {
     return res.status(400).json({ error: "Choose a valid assistant mode." });
@@ -73,8 +61,9 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
     return res.status(400).json({ error: "Choose a supported interface language." });
   }
 
-  const apiKey = process.env.AI_API_KEY;
-  const model = process.env.AI_MODEL;
+  // FIX: Accept GEMINI_API_KEY as fallback, so old keys work too
+  const apiKey = process.env.AI_API_KEY || process.env.GEMINI_API_KEY;
+  const model = process.env.AI_MODEL || "gemini-2.0-flash";
   if (!apiKey || !model) {
     return res.status(503).json({
       code: "AI_NOT_CONFIGURED",
@@ -82,7 +71,8 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
     });
   }
 
-  const endpoint = process.env.AI_API_URL || "https://api.openai.com/v1/chat/completions";
+  // FIX: Default to Gemini OpenAI-compatible endpoint
+  const endpoint = process.env.AI_API_URL || "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
   let parsedTimeout = Number(process.env.AI_TIMEOUT_MS || 45000);
   if (!Number.isFinite(parsedTimeout)) parsedTimeout = 45000;
   const timeoutMs = Math.min(120000, Math.max(5000, parsedTimeout));
@@ -102,7 +92,7 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
     });
     const data = await upstream.json().catch(() => null);
     if (!upstream.ok) {
-      console.error("AI provider error status:", upstream.status);
+      console.error("AI provider error status:", upstream.status, JSON.stringify(data));
       return res.status(502).json({ error: "The AI provider could not complete this request. Check provider configuration, billing and limits." });
     }
     const reply = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
@@ -122,7 +112,6 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
 });
 
 app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
-// Single-page fallback for app routes only; missing files (anything with an extension) get a real 404.
 app.get("*", (req, res) => {
   if (path.extname(req.path)) return res.status(404).type("text/plain").send("Not found");
   return res.sendFile(path.join(PUBLIC_DIR, "index.html"));
@@ -140,5 +129,4 @@ if (require.main === module) {
   app.listen(PORT, () => console.log(`NEXO AI listening on port ${PORT}`));
 }
 
-module.exports = app;
-module.exports.app = app;
+module.exports = { app };
